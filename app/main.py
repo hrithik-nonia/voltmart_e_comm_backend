@@ -2,8 +2,18 @@ from fastapi import FastAPI
 from strawberry.fastapi import GraphQLRouter
 from app.schema import schema
 from app.database import db
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="VoltMart API")
+
+# cross origin allow
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Vite ka port
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # GraphQL endpoint
 graphql_app = GraphQLRouter(schema)

@@ -11,4 +11,3 @@ client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URL)
 db = client[DATABASE_NAME]
 
 users_collection = db["users"]
-admin_collection = db["admin"]

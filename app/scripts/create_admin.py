@@ -3,7 +3,7 @@ import os
 import asyncio
 
 from app.utility.auth_support import auth_support
-from app.database import admin_collection
+from app.database import users_collection
 from app.utility.cloudnery import upload_image
 from app.schema import Role
 
@@ -11,7 +11,7 @@ from app.schema import Role
 async def cerate_first_admin():
   email = "hrithiknonia66@gmail.com"
   # ── 1. Pehle check karo admin hai ya nahi ──
-  existing = await admin_collection.find_one({"email": email})
+  existing = await users_collection.find_one({"email": email})
   if existing:
     print("⚠️  Admin already exists!")
     return
@@ -45,7 +45,7 @@ async def cerate_first_admin():
   }
   
   # ── 5. MongoDB mein insert karo ──
-  result = await admin_collection.insert_one(admin)
+  result = await users_collection.insert_one(admin)
 
   print(f"\n✅ Admin successfully created!")
   print(f"🆔 ID:       {result.inserted_id}")

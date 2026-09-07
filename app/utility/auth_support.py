@@ -10,6 +10,12 @@ class AuthSupport:
         )
 
         return hashed_password.decode("utf-8")
+    
+    def verify_pass(self, plain: str, hashed: str) -> bool:
+        return bcrypt.checkpw(
+            plain.encode("utf-8"),
+            hashed.encode("utf-8")
+        )
 
 
 auth_support = AuthSupport()
