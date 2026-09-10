@@ -3,6 +3,7 @@ from strawberry.fastapi import GraphQLRouter
 from app.schema import schema
 from app.database import db
 from fastapi.middleware.cors import CORSMiddleware
+from app.routes.upload import router as upload_router
 
 app = FastAPI(title="VoltMart API")
 
@@ -14,6 +15,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# rest routes
+app.include_router(upload_router)
+
 
 # GraphQL endpoint
 graphql_app = GraphQLRouter(schema)

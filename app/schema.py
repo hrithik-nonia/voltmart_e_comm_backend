@@ -1,10 +1,25 @@
 import strawberry
 from enum import Enum
 
-from app.resolvers.hello import Query
+from app.resolvers.hello import Query as HelloQuery
 from app.resolvers.admin.admin_auth import AdminAuth
+from app.resolvers.product.queries import ProductQuery
+from app.resolvers.product.mutations import ProductMutation
 
-schema = strawberry.Schema(query=Query,mutation=AdminAuth )
+
+# ✅ Saari queries merge
+@strawberry.type
+class Query(HelloQuery, ProductQuery):
+    pass
+
+
+# ✅ Saare mutations merge
+@strawberry.type
+class Mutation(AdminAuth, ProductMutation):
+    pass
+
+
+schema = strawberry.Schema(query=Query, mutation=Mutation)
 
 
 # ======================
