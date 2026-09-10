@@ -5,11 +5,12 @@ from app.resolvers.hello import Query as HelloQuery
 from app.resolvers.admin.admin_auth import AdminAuth
 from app.resolvers.product.queries import ProductQuery
 from app.resolvers.product.mutations import ProductMutation
+from app.resolvers.user.user_query import UserQuery
 
 
 # ✅ Saari queries merge
 @strawberry.type
-class Query(HelloQuery, ProductQuery):
+class Query(HelloQuery, ProductQuery, UserQuery):
     pass
 
 
