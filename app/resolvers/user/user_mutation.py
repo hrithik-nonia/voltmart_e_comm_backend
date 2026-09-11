@@ -88,38 +88,38 @@ class UserMutation:
     
     
   # user login
-  @strawberry.mutation
-  async def user_login(self, email: str, password: str)-> AuthPayload:
-    user = await users_collection.find_one({"email": email})
-    if not user:
-      raise Exception("User Not Found")
+  # @strawberry.mutation
+  # async def user_login(self, email: str, password: str)-> AuthPayload:
+  #   user = await users_collection.find_one({"email": email})
+  #   if not user:
+  #     raise Exception("User Not Found")
     
-    # 2. Password verify karo
-    is_valid = auth_support.verify_pass(password, user["password"])
-    if not is_valid:
-      raise Exception("Email ya password galat hai")
+  #   # 2. Password verify karo
+  #   is_valid = auth_support.verify_pass(password, user["password"])
+  #   if not is_valid:
+  #     raise Exception("Email ya password galat hai")
     
-    # 3. Active check
-    if not user.get("is_active", True):
-        raise Exception("Account disabled hai")
+  #   # 3. Active check
+  #   if not user.get("is_active", True):
+  #       raise Exception("Account disabled hai")
       
-    # 4. Token banao
-    token = create_token(str(user["_id"]), user["role"])
+  #   # 4. Token banao
+  #   token = create_token(str(user["_id"]), user["role"])
     
-    # 5. UserData object banao ✅
-    user_data = UserData(
-      id=str(user["_id"]),        # ← ObjectId → string
-      name=user["name"],
-      email=user["email"],
-      role=user["role"],
-      image=user.get("image")     # ← None bhi ho sakta hai
-    )
+  #   # 5. UserData object banao ✅
+  #   user_data = UserData(
+  #     id=str(user["_id"]),        # ← ObjectId → string
+  #     name=user["name"],
+  #     email=user["email"],
+  #     role=user["role"],
+  #     image=user.get("image")     # ← None bhi ho sakta hai
+  #   )
 
-    return AuthPayload(
-        token=token,
-        message="Login successful",
-        user= user_data
-    )
+  #   return AuthPayload(
+  #       token=token,
+  #       message="Login successful",
+  #       user= user_data
+  #   )
     
     
        
