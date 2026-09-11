@@ -6,6 +6,8 @@ from app.resolvers.admin.admin_auth import AdminAuth
 from app.resolvers.product.queries import ProductQuery
 from app.resolvers.product.mutations import ProductMutation
 from app.resolvers.user.user_query import UserQuery
+from app.resolvers.user.user_mutation import UserMutation
+
 
 
 # ✅ Saari queries merge
@@ -16,16 +18,10 @@ class Query(HelloQuery, ProductQuery, UserQuery):
 
 # ✅ Saare mutations merge
 @strawberry.type
-class Mutation(AdminAuth, ProductMutation):
+class Mutation(AdminAuth, ProductMutation, UserMutation):
     pass
 
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)
 
 
-# ======================
-@strawberry.enum
-class Role(Enum):
-    USER = "user"
-    ADMIN = "admin"
-    SELLER = "seller"

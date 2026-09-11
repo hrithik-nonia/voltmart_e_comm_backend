@@ -2,34 +2,10 @@ import strawberry
 from app.database import users_collection
 from app.utility.auth_support import auth_support
 from app.utility.jwt_support import create_token
-from typing import Optional
-
-
-# ── GraphQL Types ──────────────────────────
-
-@strawberry.type
-class UserData:
-    id: str
-    name: str
-    email: str
-    role: str
-    image: Optional[str] = None
-
-@strawberry.type
-class AuthPayload:
-    token: str
-    message: str
-    user: UserData
+from app.utility.auth_model import AuthPayload, UserData
     
 
-@strawberry.input
-class LoginInput:
-    email: str
-    password: str
-
-
 # ── Mutation ──────────────────────────────
-
 @strawberry.type
 class AdminAuth:
 

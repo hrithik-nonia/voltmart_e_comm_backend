@@ -36,3 +36,18 @@ async def startup():
         print("✅ MongoDB connected successfully")
     except Exception as e:
         print(f"❌ MongoDB connection failed: {e}")
+        
+    # TTL index — 5 minute baad auto delete
+    await db.temp_data.create_index(
+        "expires_at",
+        expireAfterSeconds=0
+    )
+    print("✅ TTL index created")
+    
+    # Email index — fast search ke liye
+    await db.users_collection.create_index(
+        "data.email",
+        unique=True  # ← duplicate email nahi aayega
+    )
+    
+    print("✅ Indexes created")

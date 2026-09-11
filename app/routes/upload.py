@@ -2,6 +2,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from app.utility.cloudnery import upload_image
 from app.utility.jwt_support import verify_token
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from app.routes.file_check import file_check
 
 router = APIRouter()
 security = HTTPBearer()
@@ -14,30 +15,36 @@ def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(securi
         raise HTTPException(status_code=403, detail="Admin access required")
     return payload
   
-# ── Upload endpoint ──
+# ── Upload endpoint for product ──
 @router.post("/upload/image")
 async def upload_product_image(
     file: UploadFile = File(...),
     admin = Depends(get_current_admin)
 ):
-    # 1. File type check
-    allowed_types = ["image/jpeg", "image/png", "image/webp"]
-    if file.content_type not in allowed_types:
-        raise HTTPException(
-            status_code=400,
-            detail="Sirf JPG, PNG, WEBP allowed hai"
-        )
-      
-    # 2. File size check — 5MB max
-    file_bytes = await file.read()
-    if len(file_bytes) > 5 * 1024 * 1024:
-        raise HTTPException(
-            status_code=400,
-            detail="File 5MB se badi nahi honi chahiye"
-        )
-        
+    
+    file_bytes = await file_check(file)
+    if not file_bytes:
+        raise HTTPException(status_code= 400, detail="ya file nahi le sakte ")
+    
     # 3. Cloudinary pe upload
     image_url = upload_image(file_bytes, folder="voltmart/products")
     
     return {"image_url": image_url}
+
+
+# image uplode end point for signup
+@router.post("/upload/profile-image")
+async def upload_profile_image(file: UploadFile= File(...)):
+    
+    file_bytes = await file_check(file)
+    if not file_bytes:
+        raise HTTPException(status_code= 400, detail="ya file nahi le sakte ")
+    
+    # 3. Cloudinary pe upload
+    image_url = upload_image(file_bytes, folder="voltmart/profile-images")
+    
+    return {"image_url": image_url}
+    
+    
+    
         

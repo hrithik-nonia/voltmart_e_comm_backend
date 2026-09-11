@@ -12,3 +12,4 @@ db = client[DATABASE_NAME]
 
 users_collection = db["users"]
 product_collection = db["products"]
+temp_user = db["temp_user"]
