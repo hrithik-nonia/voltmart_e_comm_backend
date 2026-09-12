@@ -1,11 +1,12 @@
 import strawberry
-from typing import Optional
+from typing import Optional, List
 
 @strawberry.type
 class SpecsType:
     brand: str
     color: str
     warranty: str
+    
 
 @strawberry.type
 class ProductType:
@@ -19,6 +20,7 @@ class ProductType:
     image: str
     is_active: bool
     is_featured: bool
+
 
 @strawberry.input
 class SpecsInput:
@@ -38,3 +40,28 @@ class ProductInput:
     specs: SpecsInput = strawberry.field(default_factory=SpecsInput)
     is_active: bool = True
     is_featured: bool = False
+
+@strawberry.type
+class Product:
+    id: str
+    product_name: str
+    description: str
+    sale_price: Optional[float]
+    price: float
+    category_id: str
+    category: str 
+    image: str
+
+@strawberry.type
+class PaginationInfo:
+    page: int
+    limit: int
+    total: int
+    total_pages: int
+    has_next: bool
+    has_prev: bool
+
+@strawberry.type
+class ProductsResponse:
+    data: List[Product]
+    pagination: PaginationInfo
