@@ -38,7 +38,7 @@ async def startup():
         print(f"❌ MongoDB connection failed: {e}")
         
     # TTL index — 5 minute baad auto delete
-    await db.temp_data.create_index(
+    await db.temp_user.create_index(
         "expires_at",
         expireAfterSeconds=0
     )
