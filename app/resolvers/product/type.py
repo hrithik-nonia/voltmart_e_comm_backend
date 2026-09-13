@@ -20,6 +20,7 @@ class ProductType:
     image: str
     is_active: bool
     is_featured: bool
+    
 
 
 @strawberry.input
@@ -63,3 +64,8 @@ class PaginationInfo:
 class ProductsResponse:
     data: List[Product]
     pagination: PaginationInfo
+    
+@strawberry.type
+class SingleProduct:
+    data: ProductType
+    specs: SpecsType

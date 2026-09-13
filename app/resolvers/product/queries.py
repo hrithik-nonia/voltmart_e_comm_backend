@@ -1,8 +1,9 @@
 import strawberry
 from app.database import product_collection
 from typing import Optional
-from app.resolvers.product.type import ProductsResponse, Product, PaginationInfo
+from app.resolvers.product.type import ProductsResponse, Product, PaginationInfo, SingleProduct, ProductType, SpecsType
 from math import ceil
+from bson import ObjectId
 
 @strawberry.type
 class ProductQuery:
@@ -66,3 +67,30 @@ class ProductQuery:
                 has_next=page < total_pages,
             ),
         )
+        
+    @strawberry.field
+    async def get_product_by_id(self, product_id: str) -> SingleProduct:
+        product = await product_collection.find_one({"_id": ObjectId(product_id)})
+
+        specs = product.get("specs", {})
+
+        return SingleProduct(
+            data=ProductType(
+                id=str(product["_id"]),
+                product_name=product["product_name"],
+                description=product.get("description", ""),
+                price=product["price"],
+                sale_price=product.get("sale_price"),
+                stock=product.get("stock", 0),
+                category=product.get("category", ""),
+                image=product.get("image", ""),
+                is_active=product.get("is_active", True),
+                is_featured=product.get("is_featured", False),
+            ),
+            specs=SpecsType(
+                brand=specs.get("brand", ""),
+                color=specs.get("color", ""),
+                warranty=specs.get("warranty", ""),
+            ),
+        )
+        
