@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from strawberry.fastapi import GraphQLRouter
 from app.schema import schema
 from app.database import db
@@ -16,12 +16,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# request setup for verify token
+async def get_context(request: Request):
+    return {"request": request} 
+
 # rest routes
 app.include_router(upload_router)
 
 
 # GraphQL endpoint
-graphql_app = GraphQLRouter(schema)
+graphql_app = GraphQLRouter(schema, context_getter=get_context)
 app.include_router(graphql_app, prefix="/graphql")
 
 @app.get("/")

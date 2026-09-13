@@ -69,3 +69,8 @@ class ProductsResponse:
 class SingleProduct:
     data: ProductType
     specs: SpecsType
+    
+    
+@strawberry.type
+class CartResponse:
+    message: str

@@ -22,3 +22,4 @@ def verify_token(token: str) -> dict:
         raise Exception("Token expire ho gaya")
     except jwt.InvalidTokenError:
         raise Exception("Invalid token")
+    
