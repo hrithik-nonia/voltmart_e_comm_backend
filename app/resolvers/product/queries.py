@@ -19,7 +19,7 @@ class ProductQuery:
         match_filter = {}
         if category_id:                             
             match_filter["category"] = category_id
-
+            
         pipeline = [
             {"$match": match_filter},
             # category collection se join
@@ -57,14 +57,12 @@ class ProductQuery:
                 )
             )
             
-        return ProductsResponse(      # yeh missing tha
+        return ProductsResponse(  
             data=products,
             pagination=PaginationInfo(
                 page=page,
                 limit=limit,
                 total=total,
-                total_pages=total_pages,
                 has_next=page < total_pages,
-                has_prev=page > 1,
             ),
         )
