@@ -1,9 +1,12 @@
 import strawberry
 from app.database import product_collection
 from typing import Optional
-from app.resolvers.product.type import ProductsResponse, Product, PaginationInfo, SingleProduct, ProductType, SpecsType
+from app.resolvers.product.type import ProductsResponse, Product, PaginationInfo, SingleProduct, ProductType, SpecsType, OrderProduct
 from math import ceil
 from bson import ObjectId
+from strawberry.types import Info
+from app.utility.jwt_support import verify_token
+from app.utility.auth_support import auth_support
 
 @strawberry.type
 class ProductQuery:
@@ -72,6 +75,9 @@ class ProductQuery:
     async def get_product_by_id(self, product_id: str) -> SingleProduct:
         product = await product_collection.find_one({"_id": ObjectId(product_id)})
 
+        if not product:
+            raise Exception("Product Nahi hai")
+        
         specs = product.get("specs", {})
 
         return SingleProduct(
@@ -93,4 +99,28 @@ class ProductQuery:
                 warranty=specs.get("warranty", ""),
             ),
         )
+        
+        
+    @strawberry.field
+    async def get_order_product(self, info: Info, product_id: str, quantity: int) -> OrderProduct:
+        # pehle token verify karo
+        user_id = auth_support.get_user_from_info(info)
+
+        # phir product fetch karo
+        product = await product_collection.find_one({"_id": ObjectId(product_id)})
+        
+        if not product:
+            raise Exception("Product Nahi hai")
+        
+        total_price = product["price"] * quantity  
+
+        return OrderProduct(
+            id=str(product["_id"]),        
+            name=product["product_name"],
+            image=product["image"],
+            quantity=quantity,
+            price=product["price"],
+            total_price=total_price,         
+        )
+        
         

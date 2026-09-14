@@ -1,4 +1,5 @@
 import bcrypt
+from app.utility.jwt_support import verify_token
 
 
 class AuthSupport:
@@ -16,6 +17,23 @@ class AuthSupport:
             plain.encode("utf-8"),
             hashed.encode("utf-8")
         )
+        
+    # app/utility/auth.py
+    def get_user_from_info(self, info) -> str:
+        request = info.context["request"]
+        auth_header = request.headers.get("Authorization")
+        
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise Exception("Token missing — Login karo")
+        
+        token = auth_header.split(" ")[1]
+        payload = verify_token(token)
+        user_id = payload.get("id")
+        
+        if not user_id:
+            raise Exception("Invalid token")
+        
+        return user_id
 
 
 auth_support = AuthSupport()

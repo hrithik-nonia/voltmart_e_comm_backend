@@ -74,3 +74,12 @@ class SingleProduct:
 @strawberry.type
 class CartResponse:
     message: str
+    
+@strawberry.type
+class OrderProduct:
+    id:str
+    name: str
+    image: str
+    quantity: int
+    price: float
+    total_price: float
