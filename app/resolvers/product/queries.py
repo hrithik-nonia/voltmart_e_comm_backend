@@ -101,17 +101,13 @@ class ProductQuery:
         
         
     @strawberry.field
-    async def get_order_product(self, info: Info, product_id: str, quantity: int) -> List[OrderProduct]:
-        # token verify kiya
+    async def get_order_product(self, info: Info, product_id: str, quantity: int) -> OrderProduct:
         user_id = auth_support.get_user_from_info(info)
 
-        # phir product fetch karo
         product = await product_collection.find_one({"_id": ObjectId(product_id)})
         
         if not product:
             raise Exception("Product Nahi hai")
-        
-        total_price = product["price"] * quantity  
 
         return OrderProduct(
             id=str(product["_id"]),        
@@ -119,7 +115,7 @@ class ProductQuery:
             image=product["image"],
             quantity=quantity,
             price=product["price"],
-            total_price=total_price,         
+            total_price=product["price"] * quantity,         
         )
         
     @strawberry.field
