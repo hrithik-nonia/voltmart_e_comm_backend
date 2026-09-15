@@ -83,3 +83,15 @@ class OrderProduct:
     quantity: int
     price: float
     total_price: float
+    
+    
+@strawberry.type
+class CartDataResponse:
+    cart_id: str
+    product_id: str
+    image: str
+    product_name: str
+    in_stock: bool
+    description: str
+    sale_price: Optional[float]
+    price: float
