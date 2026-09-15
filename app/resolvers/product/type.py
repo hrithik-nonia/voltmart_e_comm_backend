@@ -95,3 +95,6 @@ class CartDataResponse:
     description: str
     sale_price: Optional[float]
     price: float
+    quantity: int
+    
+    

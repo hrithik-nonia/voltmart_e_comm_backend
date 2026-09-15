@@ -2,10 +2,10 @@ import strawberry
 from pydantic import ValidationError
 from app.resolvers.product.type import ProductType, ProductInput, CartResponse
 from app.utility.product_model import ProductModel, SpecsModel
-from app.database import product_collection, cart_collection
+from app.database import product_collection, cart_collection, users_collection
 from bson import ObjectId
 from strawberry.types import Info
-from app.utility.jwt_support import verify_token
+from app.utility.auth_support import auth_support
 
 
 @strawberry.type
@@ -55,20 +55,16 @@ class ProductMutation:
     
     @strawberry.mutation
     async def create_cart_data(self, info: Info, product_id: str, quantity: int = 1) -> CartResponse:
-        # request se token lo
-        request = info.context["request"]
-        auth_header = request.headers.get("Authorization")
-        
-        
-        if not auth_header or not auth_header.startswith("Bearer "):
-            raise Exception("Token missing")
-        
-        token = auth_header.split(" ")[1]
-        payload = verify_token(token)
-        user_id = payload.get("id") 
+        user_id = auth_support.get_user_from_info(info)
         
         if not user_id:
             raise Exception("Invalid token")
+        
+        user = await users_collection.find_one({"_id": ObjectId(user_id)})
+        
+        if not user:
+            raise Exception("User Loggd In Nahi Hai")
+        
 
         product = await product_collection.find_one({"_id": ObjectId(product_id)})
         
@@ -87,11 +83,36 @@ class ProductMutation:
             )
             return CartResponse(message="Cart Updated Successfully")
 
-        cart_item = {
+        await cart_collection.insert_one({
             "user_id": user_id,
             "product_id": product_id,
             "quantity": quantity,
-        }
+        })
         
-        await cart_collection.insert_one(cart_item)
         return CartResponse(message="Added To Cart Successfully")
+    
+    @strawberry.mutation
+    async def delete_cart_data(self, info: Info, product_id: str)-> CartResponse:
+        user_id = auth_support.get_user_from_info(info)
+        
+        if not user_id:
+            raise Exception("Invalid token")
+        
+        user = await users_collection.find_one({"_id": ObjectId(user_id)})
+                
+        if not user:
+            raise Exception("User Loggd In Nahi Hai")
+        
+        
+        deleted_item = await cart_collection.find_one_and_delete({
+            "product_id": product_id,
+            "user_id": user_id,
+        })
+        
+        if not deleted_item:
+            raise Exception("Cart Item Does Not Exist")
+
+        return CartResponse(message="Cart Item Deleted Successfully")
+        
+        
+    

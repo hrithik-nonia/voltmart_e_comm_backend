@@ -161,6 +161,7 @@ class ProductQuery:
                 description=item["product_data"]["description"],
                 sale_price=item["product_data"].get("sale_price"),
                 price=item["product_data"]["price"],
+                quantity= item["quantity"]
             )
             for item in cart_items
         ]
