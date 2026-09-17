@@ -16,6 +16,15 @@ class DeliveryAddressInput:
     city: str
     state: str
     pin_code: str
+    
+@strawberry.type
+class DeliveryAddressResponse:
+    full_name: str
+    phone_num: str
+    street_address: str
+    city: str
+    state: str
+    pin_code: str
 
 
 @strawberry.input
@@ -42,6 +51,18 @@ class MyOrdersResponse:
     payment_status: str
     delivery_status: str
     created_at: str
+    
+@strawberry.type
+class Amounts:
+    subtotal: float
+    discount: float
+    shipping: float
+    
+@strawberry.type
+class GetASingleOrder(MyOrdersResponse):
+    address: DeliveryAddressResponse
+    amounts: Amounts
+    
     
 # ── Status Enum ──
 @strawberry.enum
