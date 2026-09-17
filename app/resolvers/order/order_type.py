@@ -1,4 +1,5 @@
 import strawberry
+from enum import Enum
 
 # @strawberry.type
 # class RazorpayOrderResponse:
@@ -30,3 +31,24 @@ class OrderResponse:
     total: float
     message: str
     
+@strawberry.type
+class MyOrdersResponse:
+    id: str
+    order_number: str
+    product_image: str
+    product_name: str
+    quantity: int
+    total: float
+    payment_status: str
+    delivery_status: str
+    created_at: str
+    
+# ── Status Enum ──
+@strawberry.enum
+class OrderStatus(Enum):
+    ALL = "all"
+    PENDING = "pending"
+    CONFIRMED= "confirmed"
+    SHIPPED = "shipped"
+    DELIVERED = "delivered"
+    CANCELLED = "cancelled"

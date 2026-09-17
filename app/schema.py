@@ -9,11 +9,12 @@ from app.resolvers.user.user_query import UserQuery
 from app.resolvers.user.user_mutation import UserMutation
 from app.resolvers.category.category_query import CategoryQuery
 from app.resolvers.order.order_mutation import OrderMutation
+from app.resolvers.order.order_query import OrderQuery
 
 
 # ✅ Saari queries merge
 @strawberry.type
-class Query(HelloQuery, ProductQuery, UserQuery, CategoryQuery):
+class Query(HelloQuery, ProductQuery, UserQuery, CategoryQuery, OrderQuery):
     pass
 
 
