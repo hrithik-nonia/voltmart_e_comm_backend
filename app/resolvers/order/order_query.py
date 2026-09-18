@@ -76,6 +76,7 @@ class OrderQuery:
 
       return GetASingleOrder(
           id=str(order["_id"]),
+          product_id=str(item["product_id"]),
           order_number=order["order_number"],
           product_image=item.get("image") or "",
           product_name=item["name"],
