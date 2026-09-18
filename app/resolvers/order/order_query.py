@@ -27,13 +27,14 @@ class OrderQuery:
         
     # 3. Orders fetch karo
     orders = await order_collection.find(query).to_list(length=None)
-    
+        
     # 4. Response banao
     result = []
     
     for order in orders:
       result.append(MyOrdersResponse(
           id=str(order["_id"]),
+          product_id=str(order["items"][0]["product_id"]),
           order_number=order["order_number"],
           product_image=order["items"][0].get("image") or "",
           product_name=order["items"][0]["name"],

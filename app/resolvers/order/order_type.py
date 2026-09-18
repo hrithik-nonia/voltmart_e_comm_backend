@@ -45,6 +45,7 @@ class MyOrdersResponse:
     id: str
     order_number: str
     product_image: str
+    product_id: str  
     product_name: str
     quantity: int
     total: float
@@ -73,3 +74,13 @@ class OrderStatus(Enum):
     SHIPPED = "shipped"
     DELIVERED = "delivered"
     CANCELLED = "cancelled"
+    
+@strawberry.type
+class OrderUpdateMessage:
+    message: str
+    
+    
+@strawberry.enum
+class UserOrderAcctions(Enum):
+    CANCEL = "cancel"
+    BUY_AGAIN = "buy_again"

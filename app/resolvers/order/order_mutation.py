@@ -2,9 +2,9 @@ import strawberry
 from strawberry.types import Info
 # from app.utility.auth_support import auth_support
 # from app.utility.razorpay_client import razorpay_client
-from app.resolvers.order.order_type import OrderInput, OrderResponse
+from app.resolvers.order.order_type import OrderInput, OrderResponse, OrderUpdateMessage, UserOrderAcctions, OrderStatus
 from app.utility.auth_support import auth_support
-from app.database import product_collection, order_collection
+from app.database import product_collection, order_collection, users_collection
 from datetime import datetime, timezone
 # from app.database import product_collection
 # import os
@@ -128,7 +128,7 @@ class OrderMutation:
                 "state": input.address.state.strip(),
                 "pin_code": input.address.pin_code.strip(),
             },
-            "payment_status": "pending",
+            "payment_status": OrderStatus.PENDING.value,
             "status": "pending",
             "created_at": datetime.now(timezone.utc),
         }
@@ -148,3 +148,55 @@ class OrderMutation:
             total=total,
             message="Order successfully place ho gaya"
         )
+        
+    
+    @strawberry.mutation
+    async def cancel_order(self, info: Info, order_id: str) -> OrderUpdateMessage:
+        user_id = auth_support.get_user_from_info(info)
+        
+        # Check karo — sirf apna order cancel kar sake
+        order = await order_collection.find_one({
+            "_id": ObjectId(order_id),
+            "user_id": ObjectId(user_id)  
+        })
+        
+        if not order:
+            raise Exception("Order nahi mila")
+        
+        if order["status"] not in ["pending", "confirmed" ]:
+            raise Exception("Yeh order cancel nahi ho sakta")
+        
+        await order_collection.update_one(
+            {"_id": ObjectId(order_id)},
+            {"$set": {"status": OrderStatus.CANCELLED.value}}
+        )
+        
+        return OrderUpdateMessage(message="Order cancel ho gaya")
+    
+    
+    # for admin only
+    @strawberry.mutation
+    async def update_order_status(
+        self,
+        info: Info,
+        order_id: str,
+        status: OrderStatus
+    ) -> OrderUpdateMessage:
+        # Admin check
+        user_id = auth_support.get_user_from_info(info)
+        user = await users_collection.find_one({"_id": ObjectId(user_id)})
+        
+        if user["role"] != "admin":
+            raise Exception("Admin access required")
+        
+        order = await order_collection.find_one({"_id": ObjectId(order_id)})
+        if not order:
+            raise Exception("Order nahi mila")
+        
+        await order_collection.update_one(
+            {"_id": ObjectId(order_id)},
+            {"$set": {"status": status.value}}
+        )
+        
+        return OrderUpdateMessage(message=f"Order status {status.value} ho gaya")
+        
