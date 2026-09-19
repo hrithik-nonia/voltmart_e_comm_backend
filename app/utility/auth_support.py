@@ -18,7 +18,7 @@ class AuthSupport:
             hashed.encode("utf-8")
         )
         
-    # app/utility/auth.py
+    # for graphQl end point
     def get_user_from_info(self, info) -> str:
         request = info.context["request"]
         auth_header = request.headers.get("Authorization")
@@ -34,6 +34,7 @@ class AuthSupport:
             raise Exception("Invalid token")
         
         return user_id
+    
 
 
 auth_support = AuthSupport()

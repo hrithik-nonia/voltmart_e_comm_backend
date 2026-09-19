@@ -4,6 +4,7 @@ from app.schema import schema
 from app.database import db
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.upload import router as upload_router
+from app.routes.export import router as export_router
 
 app = FastAPI(title="VoltMart API")
 
@@ -22,6 +23,7 @@ async def get_context(request: Request):
 
 # rest routes
 app.include_router(upload_router)
+app.include_router(export_router)
 
 
 # GraphQL endpoint

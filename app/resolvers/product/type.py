@@ -98,3 +98,29 @@ class CartDataResponse:
     quantity: int
     
     
+@strawberry.type
+class AdminProductResponse:
+    id: str
+    image: str
+    product_name: str
+    sku: str
+    created_at: str
+    price: float
+    stock: int
+    is_active: bool
+    specs: SpecsType
+    
+    
+@strawberry.type
+class AdminProductsResponse:
+    products: list[AdminProductResponse]
+    pagination: PaginationInfo
+    
+    
+@strawberry.type
+class InventoryStats:
+    total_products: int
+    active_products: int
+    low_stock: int
+    out_of_stock: int
+    

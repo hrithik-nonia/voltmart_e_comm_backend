@@ -84,3 +84,18 @@ class OrderUpdateMessage:
 class UserOrderAcctions(Enum):
     CANCEL = "cancel"
     BUY_AGAIN = "buy_again"
+    
+@strawberry.type
+class DashboardStats:
+    total_revenue: float
+    total_fulfillment: int 
+    total_orders: int 
+    total_products: int
+    total_customers: int
+    
+@strawberry.type
+class CustomerStats:
+    total_customers: int
+    active_users: int
+    admin_users: int
+    inactive_users: int

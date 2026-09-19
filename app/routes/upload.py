@@ -1,20 +1,10 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from app.utility.cloudnery import upload_image
-from app.utility.jwt_support import verify_token
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.routes.file_check import file_check
+from app.routes.get_current_user_for_rest import get_current_admin
 
 router = APIRouter()
-security = HTTPBearer()
 
-# ── Admin check ──
-def get_current_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token = credentials.credentials
-    payload = verify_token(token)
-    if payload["role"] not in ["admin", "superadmin"]:
-        raise HTTPException(status_code=403, detail="Admin access required")
-    return payload
-  
 # ── Upload endpoint for product ──
 @router.post("/upload/image")
 async def upload_product_image(
