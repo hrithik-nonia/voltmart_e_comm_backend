@@ -1,10 +1,12 @@
 import strawberry
-from app.resolvers.order.order_type import MyOrdersResponse, OrderStatus, GetASingleOrder, DeliveryAddressResponse, Amounts, DashboardStats, CustomerStats
+from app.resolvers.order.order_type import MyOrdersResponse, OrderStatus, GetASingleOrder, DeliveryAddressResponse, Amounts, DashboardStats, CustomerStats, OrderInformation, SingleOrderInfo
+from app.resolvers.product.type import SpecsType, PaginationInfo
 from strawberry.types import Info
 from app.utility.auth_support import auth_support
 from app.database import order_collection, product_collection, users_collection
 from bson import ObjectId
 from typing import Optional
+from datetime import datetime, timedelta, timezone
 
 
 @strawberry.type
@@ -198,3 +200,112 @@ class OrderQuery:
         inactive_users=data.get("inactive_users", 0)
     )
     
+  @strawberry.field
+  async def get_orders_info_for_admin(
+        self,
+        info: Info,
+        page: int = 1,
+        limit: int = 10,
+        days: Optional[int] = None
+    ) -> OrderInformation:
+
+        user_id = auth_support.get_user_from_info(info)
+        is_logged_in = await users_collection.find_one({"_id": ObjectId(user_id)})
+        if not is_logged_in:
+            raise Exception("Login Karo")
+        
+        if is_logged_in["role"] not in ["admin", "super_admin"]:
+            raise Exception("You Are Not Admin")
+        
+        
+        skip = (page - 1) * limit
+
+        # Match stage
+        match_stage = {}
+        if days:
+            if days not in [1, 7, 30, 60, 90]:
+                raise Exception("Days 1, 7, 30, 60, 90 mein se hona chahiye")
+            from_date = datetime.now(timezone.utc) - timedelta(days=days)
+            match_stage["created_at"] = {"$gte": from_date}
+
+        # Filtered count — pagination ke liye (days filter ke saath)
+        filtered_total = await order_collection.count_documents(match_stage)
+        total_pages = (filtered_total + limit - 1) // limit
+
+        # Poore documents ka count
+        total = await order_collection.count_documents({})
+
+        pipeline = [
+            {"$match": match_stage},
+            {
+                "$lookup": {
+                    "from": "users",
+                    "localField": "user_id",
+                    "foreignField": "_id",
+                    "as": "user"
+                }
+            },
+            {"$unwind": "$user"},
+            {
+                "$lookup": {
+                    "from": "products",
+                    "localField": "items.0.product_id",
+                    "foreignField": "_id",
+                    "as": "product"
+                }
+            },
+            {"$unwind": "$product"},
+            {"$skip": skip},
+            {"$limit": limit},
+            {
+                "$project": {
+                    "_id": 1,
+                    "order_number": 1,
+                    "created_at": 1,
+                    "total": 1,
+                    "payment_method": 1,
+                    "status": 1,
+                    "items": 1,
+                    "user.name": 1,
+                    "user.email": 1,
+                    "product.specs": 1,
+                }
+            }
+        ]
+
+        orders = await order_collection.aggregate(pipeline).to_list(length=None)
+
+        result = []
+        for order in orders:
+            user = order.get("user", {})
+            product = order.get("product", {})
+            specs = product.get("specs", {})
+            item = order["items"][0]
+
+            result.append(SingleOrderInfo(
+                id=str(order["_id"]),
+                order_number=order["order_number"],
+                customer_name=user.get("name", ""),
+                customer_email=user.get("email", ""),
+                product_name=item.get("name", ""),
+                quantity=item.get("quantity", 0),
+                specs_type=SpecsType(
+                    brand=specs.get("brand", ""),
+                    color=specs.get("color", ""),
+                    warranty=specs.get("warranty", "")
+                ),
+                order_date=str(order["created_at"]),
+                total_price=order["total"],
+                payment_method=order.get("payment_method"),
+                fulfillment_status=order["status"],
+            ))
+
+        return OrderInformation(
+            orders=result,
+            pagination=PaginationInfo(
+                page=page,
+                limit=limit,
+                total=total,                  
+                has_next=page < total_pages,
+            )
+        )

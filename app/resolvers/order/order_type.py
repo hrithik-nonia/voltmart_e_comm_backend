@@ -1,5 +1,7 @@
 import strawberry
 from enum import Enum
+from typing import Optional
+from app.resolvers.product.type import SpecsType, PaginationInfo
 
 # @strawberry.type
 # class RazorpayOrderResponse:
@@ -99,3 +101,24 @@ class CustomerStats:
     active_users: int
     admin_users: int
     inactive_users: int
+    
+@strawberry.type
+class SingleOrderInfo:
+    id: str
+    order_number: str
+    customer_name: str
+    customer_email: str
+    product_name: str
+    quantity: int
+    specs_type: SpecsType
+    order_date: str
+    total_price: float
+    payment_method: Optional[str]
+    fulfillment_status: str
+
+@strawberry.type
+class OrderInformation:
+    orders: list[SingleOrderInfo]
+    pagination: PaginationInfo
+    
+    
