@@ -206,18 +206,18 @@ class OrderQuery:
         info: Info,
         page: int = 1,
         limit: int = 10,
-        days: Optional[int] = None
+        days: Optional[int] = None,
+        fulfillment_status: Optional[str] = None  # ← category_id ki jagah
     ) -> OrderInformation:
 
         user_id = auth_support.get_user_from_info(info)
         is_logged_in = await users_collection.find_one({"_id": ObjectId(user_id)})
         if not is_logged_in:
             raise Exception("Login Karo")
-        
+
         if is_logged_in["role"] not in ["admin", "super_admin"]:
             raise Exception("You Are Not Admin")
-        
-        
+
         skip = (page - 1) * limit
 
         # Match stage
@@ -228,11 +228,18 @@ class OrderQuery:
             from_date = datetime.now(timezone.utc) - timedelta(days=days)
             match_stage["created_at"] = {"$gte": from_date}
 
-        # Filtered count — pagination ke liye (days filter ke saath)
+        # ← fulfillment status filter
+        if fulfillment_status:
+            valid_statuses = ["pending", "confirmed", "shipped", "delivered", "cancelled"]
+            if fulfillment_status not in valid_statuses:
+                raise Exception("Invalid status")
+            match_stage["status"] = fulfillment_status
+
+        # Filtered count
         filtered_total = await order_collection.count_documents(match_stage)
         total_pages = (filtered_total + limit - 1) // limit
 
-        # Poore documents ka count
+        # Total count
         total = await order_collection.count_documents({})
 
         pipeline = [
@@ -305,7 +312,7 @@ class OrderQuery:
             pagination=PaginationInfo(
                 page=page,
                 limit=limit,
-                total=total,                  
+                total=total,
                 has_next=page < total_pages,
             )
         )
