@@ -1,15 +1,6 @@
 import strawberry
 from app.database import category_collection
-
-
-# ── Category Type ──
-@strawberry.type
-class CategoryType:
-    id: str
-    name: str
-    slug: str
-    description: str
-    icon: str
+from app.resolvers.category.category_type import CategoryType
 
 
 # ── Query ──

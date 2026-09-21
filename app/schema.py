@@ -10,6 +10,7 @@ from app.resolvers.user.user_mutation import UserMutation
 from app.resolvers.category.category_query import CategoryQuery
 from app.resolvers.order.order_mutation import OrderMutation
 from app.resolvers.order.order_query import OrderQuery
+from app.resolvers.category.category_mutation import CategoryMutation
 
 
 # ✅ Saari queries merge
@@ -20,7 +21,7 @@ class Query(HelloQuery, ProductQuery, UserQuery, CategoryQuery, OrderQuery):
 
 # ✅ Saare mutations merge
 @strawberry.type
-class Mutation(AdminAuth, ProductMutation, UserMutation, OrderMutation):
+class Mutation(AdminAuth, ProductMutation, UserMutation, OrderMutation, CategoryMutation):
     pass
 
 

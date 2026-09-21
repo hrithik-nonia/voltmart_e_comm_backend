@@ -121,4 +121,3 @@ class OrderInformation:
     orders: list[SingleOrderInfo]
     pagination: PaginationInfo
     
-    
