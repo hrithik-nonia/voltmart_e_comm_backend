@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 import csv
 import io
-from app.database import product_collection, order_collection
+from app.database import product_collection, order_collection, category_collection
 from app.routes.get_current_user_for_rest import get_current_admin
 from datetime import datetime, timezone, timedelta
 
@@ -59,9 +59,9 @@ async def export_recent_orders(days: int, admin=Depends(get_current_admin)):
     
     # 2. Date range banao
     now = datetime.now(timezone.utc)
-    print(now)
+    
     from_date = now - timedelta(days=days)
-    print(from_date)
+    
     
     # 3. Orders fetch karo
     orders = await order_collection.find(
@@ -126,3 +126,40 @@ async def export_recent_orders(days: int, admin=Depends(get_current_admin)):
         }
     )
     
+    
+@router.get("/export/category")
+async def export_category_csv(admin=Depends(get_current_admin)):
+    categories = await category_collection.find({}).to_list(length=None)
+    
+    if not categories:
+        raise HTTPException(status_code=404, detail="Koi category nahi mili")
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Header
+    writer.writerow([
+        "Category ID",
+        "Name",
+        "Slug",
+        "Description",
+        "Is Active",
+    ])
+    
+    # Rows
+    for category in categories:
+        writer.writerow([
+            str(category["_id"]),
+            category.get("name", ""),
+            category.get("slug", ""),
+            category.get("description", ""),
+            category.get("is_active", True),
+        ])
+    
+    output.seek(0)
+    
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=categories.csv"}
+    )

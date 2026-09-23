@@ -18,3 +18,8 @@ class CreateCategory:
 @strawberry.type
 class CreateCategoryResponse:
   message: str
+  
+@strawberry.type
+class CategoryForAdmin(CategoryType):
+    total_products : int
+    status: str
